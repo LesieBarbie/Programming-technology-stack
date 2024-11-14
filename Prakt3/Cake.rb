@@ -2,7 +2,6 @@ def split_cake(cake, raisin_char)
   rows = cake.size
   cols = cake[0].size
 
-  # Збираємо координати всіх родзинок
   raisins = []
   cake.each_with_index do |row, r|
     row.chars.each_with_index do |char, c|
@@ -21,14 +20,14 @@ def split_cake(cake, raisin_char)
   puts "Розміри пирога: #{rows}x#{cols}"
   puts "Загальна площа: #{total_area}, Площа одного шматка: #{piece_area}"
 
-  # Функція для створення шматка з координатами
+
   def get_region(cake, start_r, start_c, height, width)
     (start_r...(start_r + height)).map do |r|
       cake[r][start_c...(start_c + width)]
     end
   end
 
-  # Генерація всіх валідних шматків для кожної родзинки
+
   def find_split(cake, raisins, piece_area, raisin_char)
     regions = []
     rows = cake.size
@@ -54,7 +53,7 @@ def split_cake(cake, raisin_char)
     regions
   end
 
-  # Перевірка, чи всі шматки покривають різні області
+
   def valid_solution?(solution)
     occupied_cells = []
     solution.each do |piece|
@@ -70,7 +69,7 @@ def split_cake(cake, raisin_char)
     true
   end
 
-  # Алгоритм пошуку розбиття
+
   def solve(available_regions, raisins, raisin_char)
     combinations = available_regions.group_by { |reg| reg[:raisin] }
     combinations.values[0].product(*combinations.values[1..]).each do |combo|
@@ -86,7 +85,6 @@ def split_cake(cake, raisin_char)
   result.empty? ? [] : result.map { |r| r[:region] }
 end
 
-# Тестова функція
 def test_cake
   raisin_char = 'о'
 
