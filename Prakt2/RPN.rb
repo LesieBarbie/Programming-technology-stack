@@ -10,41 +10,30 @@ end
 def convert_rpn(expression)
   result = []
   stack = []
-  expression_space = expression.gsub(/([+\-*\/^()])/,' \1 ')
+  expression_space = expression.gsub(/([+\-*\/^()])/,' \1 ').gsub(/\s+/, ' ')
   elements = expression_space.split
   last_token = nil
 
   elements.each_with_index do |element, index|
-    if element =~ /^-?\d+(\.\d+)?$/ || (element == '-' && (last_token.nil? || %w[+ - * / (].include?(last_token)))
-      # Перевірка на унарний мінус як частину числа
-      if element == '-' && (last_token.nil? || %w[+ - * / (].include?(last_token))
-        number = "-#{elements[index + 1]}"
-        result.push(number)
-        elements[index + 1] = ''  # Уникнемо повторної обробки числа
-      else
-        result.push(element)
-      end
+    if element =~ /^-?\d+(\.\d+)?$/ || (element =~ /^[a-zA-Z]+$/ && last_token != ')') # Числа або змінні
+      result.push(element)
+    elsif element == '-' && (last_token.nil? || last_token =~ /[\+\-\*\/\(\^]/)
+      # Унарний мінус: перетворюємо його на від'ємне число
+      number = "-#{elements[index + 1]}"
+      result.push(number)
+      elements[index + 1] = '' # Пропустити наступний елемент
     elsif element == '('
       stack.push(element)
     elsif element == ')'
-      while stack.last != '('
-        raise "Невірне використання дужок" if stack.empty?
+      while stack.any? && stack.last != '('
         result.push(stack.pop)
       end
-      stack.pop
+      if stack.empty?
+        raise "Невірне використання дужок: зайва закриваюча дужка"
+      end
+      stack.pop # Видаляємо відкриваючу дужку
     else
-      # Перевірка на зайві оператори підряд
-      if element =~ /[+\-*\/^]/ && %w[+ - * / ^ (].include?(last_token)
-        raise " зайвий оператор '#{element}'"
-      end
-
-      # Перевірка на зайвий оператор в кінці виразу
-      if index == elements.size - 1 && element =~ /[+\-*\/^]/
-        raise " вираз закінчується оператором '#{element}'"
-      end
-
-      # Обробка операторів за пріоритетом
-      while !stack.empty? && priority(stack.last) >= priority(element)
+      while !stack.empty? && priority(stack.last) >= priority(element) && stack.last != '('
         result.push(stack.pop)
       end
       stack.push(element)
@@ -52,9 +41,10 @@ def convert_rpn(expression)
     last_token = element
   end
 
-  # Витягуємо всі оператори зі стеку
   while !stack.empty?
-    raise " зайва дужка" if stack.last == '(' || stack.last == ')'
+    if stack.last == '('
+      raise "Невірне використання дужок: зайва відкрита дужка"
+    end
     result.push(stack.pop)
   end
 
