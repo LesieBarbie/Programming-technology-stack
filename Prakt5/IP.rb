@@ -54,5 +54,4 @@ ip_addresses_to_test = [
   " 192.168.50.1 ",         # Пробіли
 ]
 
-puts "-------------------------------------------------------------------------"
 IPAddressValidator.main(ip_addresses_to_test)
