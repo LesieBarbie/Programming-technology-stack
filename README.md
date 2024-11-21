@@ -11,7 +11,7 @@
 
 ```bash
 gem install vowel_counter
-
+```
 ---
 
 ## **Можливості**
